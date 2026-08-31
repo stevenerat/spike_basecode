@@ -22,7 +22,32 @@ TEAM="${1:-}"
 REPO="$HOME/repos/spike_basecode"
 ASSET_BASE="https://raw.githubusercontent.com/stevenerat/spike_basecode/main/assets"
  
+DASH_UUID="dash-to-dock@micxgx.gmail.com"
+ 
 log() { printf '\n\033[1;34m[bolton]\033[0m %s\n' "$*"; }
+ 
+# Enable a GNOME extension robustly.
+# `gnome-extensions enable` silently no-ops when the shell hasn't scanned a
+# just-installed system extension yet (the reason the first run didn't take).
+# So try the CLI, and if that fails fall back to writing the enabled-extensions
+# gsettings key directly — that persists and activates on the next login.
+enable_extension() {
+  local uuid="$1"
+  local cur
+  cur="$(gsettings get org.gnome.shell enabled-extensions)"
+ 
+  if printf '%s' "$cur" | grep -q "'$uuid'"; then
+    return 0                                   # already listed → idempotent
+  fi
+  if gnome-extensions enable "$uuid" 2>/dev/null; then
+    return 0                                   # shell already knew it → enabled live
+  fi
+  # Fallback: append to the array by hand so it sticks across the next login
+  case "$cur" in
+    "@as []"|"[]") gsettings set org.gnome.shell enabled-extensions "['$uuid']" ;;
+    *)             gsettings set org.gnome.shell enabled-extensions "${cur%]*}, '$uuid']" ;;
+  esac
+}
  
 # ------------------------------------------------------------------
 # 1. Dock — Dash to Dock, pinned left, always visible (no autohide)
@@ -32,7 +57,12 @@ configure_dock() {
   if ! rpm -q gnome-shell-extension-dash-to-dock >/dev/null 2>&1; then
     sudo dnf install -y gnome-shell-extension-dash-to-dock
   fi
-  gnome-extensions enable dash-to-dock@micxgx.gmail.com 2>/dev/null || true
+ 
+  # On brand-new GNOME (e.g. 50 on Fedora 44) the packaged extension may not
+  # yet declare compatibility and would refuse to load. Uncomment to force it:
+  # gsettings set org.gnome.shell disable-extension-version-validation true
+ 
+  enable_extension "$DASH_UUID"
  
   local DTD=/org/gnome/shell/extensions/dash-to-dock
   dconf write $DTD/dock-position "'LEFT'"
@@ -96,9 +126,7 @@ main() {
   configure_dock
   set_background
   install_bookmarks
-  log "Done. Log out and back in for the dock and wallpaper to appear."
+  log "Done. Log out and back in for the dock location to change."
 }
  
 main "$@"
- 
-
