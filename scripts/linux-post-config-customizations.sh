@@ -77,8 +77,8 @@ configure_dock() {
 set_background() {
   local dir="$HOME/.local/share/backgrounds"; mkdir -p "$dir"
   local name="laptop_background.png"
-  if [ -n "$TEAM" ] && curl -sfI "$ASSET_BASE/laptop_background_${TEAM}.png" >/dev/null 2>&1; then
-    name="laptop_background_${TEAM}.png"
+  if [ -n "$TEAM" ] && curl -sfI "$ASSET_BASE/laptop_background_${TEAM}.jpg" >/dev/null 2>&1; then
+    name="laptop_background_${TEAM}.jpg"
   fi
   log "Background: $name"
   curl -sfL "$ASSET_BASE/$name" -o "$dir/$name"
