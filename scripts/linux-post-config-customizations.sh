@@ -1,5 +1,5 @@
 
-Linux Gnome desktop customizations · SH
+# Linux Gnome desktop customizations · SH
 #!/usr/bin/env bash
 #
 # linux-post-config-customizations.sh
