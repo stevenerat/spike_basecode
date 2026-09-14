@@ -217,6 +217,87 @@ These produce the same end state as the equivalent GitHub Desktop
 operations. The first `git push` of a session will prompt for the
 GitHub PAT; it'll then be cached for 8 hours.
 
+## Re-teaming a laptop (switching it to a different team)
+
+Sometimes a laptop that's already set up for one team needs to move to
+another -- usually to rebalance hardware across teams. Rather than
+wiping and re-provisioning from scratch, use
+`reconfigure-fll-laptop-linux.sh`, which switches an
+already-provisioned laptop from one team number to another in place.
+
+> This is for a laptop that has **already** been through
+> `setup-fll-laptop-linux.sh`. If the laptop was never provisioned,
+> run the setup script instead -- the re-team script assumes VS Code,
+> Chrome, Python 3.12, Flatpak, and GitHub Desktop are already
+> installed and does not reinstall them.
+
+### What it changes -- and what it leaves alone
+
+The script re-teams **only this laptop**. Nothing in the cloud is
+touched: the old team's GitHub account, its email, and its fork all
+stay intact, because that team number usually keeps running on other
+laptops. "Logging out of GitHub" means signing the old team out of
+GitHub Desktop, the `gh` CLI, and the credential cache **on this
+machine only** -- it is never an account deletion.
+
+On the laptop, it:
+
+1. Checks the existing `~/repos/spike_basecode` clone for uncommitted or unpushed work and makes you confirm before removing anything.
+2. Removes the old clone under `~/repos/spike_basecode`.
+3. Logs the old team out of GitHub on this laptop (GitHub Desktop, `gh` CLI, credential cache).
+4. Rewrites `~/.gitconfig` with the new team's identity.
+5. Swaps the four team launchers (`Open Team N Code`, `Team N Repo Folder`, `Terminal (Team N)`, `GitHub Desktop`) and the Desktop README from the old number to the new, and repoints any dash pins that referenced the old launchers.
+6. Pauses for you to sign in as the new team in GitHub Desktop and clone its fork.
+7. Configures the fresh clone (upstream remote, `.venv`, `pybricks` + `pybricksdev`, VS Code interpreter) and runs the post-config customizations, which set the **new team's** desktop background and bookmarks.
+
+### Before you start
+
+- **Have the old team push any unsaved work first.** Removing the clone is permanent. The script checks for uncommitted changes and unpushed commits and will stop and make you type `DELETE` if it finds any, but the safest move is to have the outgoing team open GitHub Desktop and **Commit** + **Push origin** before you begin.
+- Have the **new team's** email and GitHub credentials ready (same as a fresh setup -- see Steps 1 and 2 above). If the new team isn't in the script's known-teams list, it prompts for the email, display name, and GitHub username.
+
+### Run it
+
+Download `reconfigure-fll-laptop-linux.sh` from the chapter upstream
+the same way you'd download the setup script (open the file on GitHub,
+click **Raw**, save to `~/Downloads`). Then:
+
+```bash
+cd ~/Downloads
+chmod +x reconfigure-fll-laptop-linux.sh
+./reconfigure-fll-laptop-linux.sh <NewTeamNumber>
+```
+
+The **old** team number is auto-detected from the laptop's existing
+launchers (falling back to `~/.gitconfig`). If detection fails, or you
+want to be explicit, pass it as a second argument:
+
+```bash
+./reconfigure-fll-laptop-linux.sh <NewTeamNumber> <OldTeamNumber>
+```
+
+**Do NOT run with `sudo`.** Like the setup script, it refuses to run
+as root and prompts for the admin password only when the post-config
+step needs it.
+
+### Prompts you'll see
+
+- **Unsaved-work gate**: if the old clone has uncommitted or unpushed work, the script lists it and requires you to type `DELETE` to continue (or Ctrl+C to stop and go push it first).
+- **Confirm the re-team**: it prints the old team -> new team change and asks you to type the new team number to proceed.
+- **Sign the old team out** of GitHub Desktop (File > Options > Accounts > Sign out), then press Enter.
+- **New-team data** (new teams only): email, display name, GitHub username.
+- **Sign in and clone** as the new team in GitHub Desktop -- same flow as Section 8 of a fresh setup, including selecting **For my own purposes** for the fork.
+- **Sudo password** for the post-config step (wallpaper is per-user, but the managed Chrome bookmarks policy needs it).
+
+### After it finishes
+
+- If the old team was signed in to **Chrome**, sign that Google account out and (for Gmail teams) sign in as the new team's email. The script does not touch the browser profile.
+- Confirm the dash pins now show the **new** team's launchers; re-pin from Activities if any look blank.
+- **Log out and back in** so the new wallpaper (and any dock changes) apply.
+- Launch VS Code via `Open Team <NewNumber> Code` and confirm the `.venv` interpreter, then run a test program on a SPIKE hub as in Step 6.
+
+Like the setup script, the re-team script is safe to re-run if
+anything fails partway through.
+
 ## Maintaining a laptop across Linux version upgrades
 
 A laptop provisioned under one Fedora release will not just keep

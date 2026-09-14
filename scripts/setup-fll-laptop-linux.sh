@@ -4,7 +4,7 @@
 #
 # SYNOPSIS
 #   Standardized setup script for Bolton Robotics FLL chapter laptops --
-#   Linux (Fedora 42; should also work on recent Fedora and RHEL-family).
+#   Linux (Fedora; should also work on recent Fedora releases and RHEL-family).
 #
 # DESCRIPTION
 #   Run this script ONCE per donated laptop, while logged in as the
@@ -51,7 +51,7 @@
 # NOTES
 #   Author:   Steven Erat with Claude (Bolton Robotics chapter)
 #   Audience: FLL chapter coaches provisioning team laptops on Linux
-#   Tested on: Fedora 42 (GNOME 48 / Wayland)
+#   Tested on: Fedora (GNOME / Wayland)
 #
 #   Run from a terminal:
 #       chmod +x setup-fll-laptop-linux.sh
@@ -212,7 +212,7 @@ if [[ "$EUID" -eq 0 ]]; then
 fi
 
 # Desktop folder may not exist on a fresh GNOME install with desktop icons
-# disabled (Fedora 42 default). Create it so our .desktop launchers have
+# disabled (the Fedora default). Create it so our .desktop launchers have
 # somewhere to land; the user can enable Desktop Icons NG to see them.
 mkdir -p "$DESKTOP_PATH" "$APPS_PATH" "$REPOS_ROOT"
 
@@ -535,7 +535,7 @@ make_desktop_entry() {
     cp "$apps_file" "$desktop_file"
     chmod +x "$desktop_file"
 
-    # GNOME 42+ requires the user's "trust" metadata for desktop icons.
+    # Modern GNOME requires the user's "trust" metadata for desktop icons.
     # gio handles this gracefully even if the user has DING disabled.
     gio set "$desktop_file" metadata::trusted true 2>/dev/null || true
 }
