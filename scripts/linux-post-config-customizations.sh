@@ -118,6 +118,42 @@ ${team_bm}    { "name": "Chapter Docs",              "url": "https://fssfll.gith
 JSON
 }
  
+# ------------------------------------------------------------------
+# 4. Shell — auto-activate spike_basecode venv when cd'ing into repo
+# ------------------------------------------------------------------
+#
+# Adds a PROMPT_COMMAND hook to ~/.bashrc that sources .venv/bin/activate
+# whenever the current directory contains one, and deactivates on leaving.
+# Idempotent: guarded by a sentinel comment so re-running the script does
+# not duplicate the block.
+#
+# KNOWN LIMITATION: the hook fires only in the directory that holds
+# .venv (the repo root). cd'ing into a subfolder like scripts/ will
+# deactivate the venv. Acceptable for single-project team laptops.
+install_venv_hook() {
+  local bashrc="$HOME/.bashrc"
+  local sentinel='# --- FLL: auto-activate spike_basecode venv'
+  log "Shell: bashrc hook for cd-triggered venv activation"
+  if [ -f "$bashrc" ] && grep -qF "$sentinel" "$bashrc"; then
+    return 0                                     # already installed → idempotent
+  fi
+  # Quoted heredoc delimiter — $VIRTUAL_ENV, $(pwd), ${PROMPT_COMMAND:-}
+  # must be written literally into .bashrc, not expanded here.
+  cat >> "$bashrc" <<'EOF'
+
+# --- FLL: auto-activate spike_basecode venv (cd-triggered) ---
+_auto_venv() {
+    if [[ -f .venv/bin/activate ]]; then
+        [[ "$VIRTUAL_ENV" != "$(pwd)/.venv" ]] && source .venv/bin/activate
+    elif [[ -n "$VIRTUAL_ENV" ]]; then
+        deactivate 2>/dev/null
+    fi
+}
+PROMPT_COMMAND="_auto_venv;${PROMPT_COMMAND:-}"
+# --- end FLL venv hook ---
+EOF
+}
+
 main() {
   if [ "$(id -u)" -eq 0 ]; then
     echo "Run this as the FLL user, not root." >&2
@@ -126,6 +162,7 @@ main() {
   configure_dock
   set_background
   install_bookmarks
+  install_venv_hook
   log "Done. Log out and back in for the dock location to change."
 }
  
