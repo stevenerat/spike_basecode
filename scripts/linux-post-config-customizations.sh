@@ -57,7 +57,7 @@ configure_dock() {
     sudo dnf install -y gnome-shell-extension-dash-to-dock
   fi
  
-  # On brand-new GNOME (e.g. 50 on Fedora 44) the packaged extension may not
+  # On a brand-new GNOME release the packaged extension may not
   # yet declare compatibility and would refuse to load. Uncomment to force it:
   # gsettings set org.gnome.shell disable-extension-version-validation true
  
