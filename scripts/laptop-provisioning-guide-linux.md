@@ -1,4 +1,4 @@
-# Provisioning a New FLL Team Laptop (Linux / Fedora 42)
+# Provisioning a New FLL Team Laptop (Linux / Fedora)
 
 A guide for any coach setting up a donated **Linux** laptop for a
 Bolton Robotics FLL team. Start with **Quick Start** below. If
@@ -54,7 +54,7 @@ them. You can't clone the repo first.
 
 Before you start the laptop itself:
 
-- A donated laptop running **Fedora 42** (GNOME 48 / Wayland is the tested config). Older Fedora releases or RHEL-family kin should work; Debian/Ubuntu will need the `dnf install` lines adapted to `apt`.
+- A donated laptop running **Fedora**. Older Fedora releases or RHEL-family kin should work; Debian/Ubuntu will need the `dnf install` lines adapted to `apt`.
 - The user account is in the **`wheel` group** (can run `sudo`). Confirm with `groups | grep -q wheel` -- if it's missing, an existing admin must run `sudo usermod -aG wheel <user>` and log the user out/in.
 - The laptop is reasonably up to date. If it's been idle for months, run `sudo dnf upgrade --refresh` separately before starting the provisioning script.
 - A reliable internet connection.
